@@ -1,4 +1,4 @@
-package com.stackmobile.fitjourney.database.DAO;
+package com.stackmobile.fit_journey.database.DAO;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -7,7 +7,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.stackmobile.fitjourney.database.entities.User;
+import com.stackmobile.fit_journey.database.entities.User;
 
 @Dao
 public interface UserDAO {

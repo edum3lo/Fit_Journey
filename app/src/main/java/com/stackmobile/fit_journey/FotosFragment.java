@@ -1,72 +1,91 @@
 package com.stackmobile.fit_journey;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.stackmobile.fit_journey.database.LocalDatabase;
+import com.stackmobile.fit_journey.database.entities.Image;
+import com.stackmobile.fit_journey.database.entities.User;
+import com.stackmobile.fit_journey.databinding.FragmentFotosBinding;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class FotosFragment extends Fragment {
 
-    private static final String TAG = "FotosFragment";
-    private Button buttonTakePhoto;
-    private GridView gridViewGallery;
-    private TextView textViewNoPhotos;
-    private ArrayList<String> imagePathList;
+    private FragmentFotosBinding binding;
+    private LocalDatabase localDatabase;
     private ImageAdapter imageAdapter;
-    private String currentPhotoPath;
+    private List<Image> imageList = new ArrayList<>();
+    private User usuario;
     private ActivityResultLauncher<String[]> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> takePictureLauncher;
+    private String currentPhotoPath;
 
-    @SuppressLint("MissingInflatedId")
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_fotos, container, false);
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState
+    ) {
 
-        buttonTakePhoto = view.findViewById(R.id.buttonTakePhoto);
-        gridViewGallery = view.findViewById(R.id.gridViewPhotos);
-        textViewNoPhotos = view.findViewById(R.id.textFotos);
-        imagePathList = new ArrayList<>();
-        imageAdapter = new ImageAdapter(getContext(), imagePathList);
-        gridViewGallery.setAdapter(imageAdapter);
+        binding = FragmentFotosBinding.inflate(inflater, container, false);
+
+        localDatabase = LocalDatabase.getDatabase(requireContext());
+
+        usuario = getArguments().getParcelable("usuario");
 
         initializePermissionLauncher();
         initializeTakePictureLauncher();
 
-        buttonTakePhoto.setOnClickListener(v -> requestPermissionLauncher.launch(new String[] {
+        if (usuario != null)
+            imageList = localDatabase.imageModel().getImagesByUserId(usuario.getId());
+
+        return binding.getRoot();
+
+    }
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ArrayList<String> imagePathList = new ArrayList<>();
+        for (Image image : imageList) {
+            imagePathList.add(image.getImagePath());
+        }
+
+        imageAdapter = new ImageAdapter(requireContext(), imagePathList);
+
+        RecyclerView recyclerView = binding.recyclerGridViewPhotos;
+        recyclerView.setAdapter(imageAdapter);
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+        binding.recyclerGridViewPhotos.setLayoutManager(layoutManager);
+        binding.recyclerGridViewPhotos.addItemDecoration(new GridSpacingItemDecoration(3, 10, true));
+
+        binding.buttonTakePhoto.setOnClickListener(v -> requestPermissionLauncher.launch(new String[] {
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
         }));
-
-        loadImagesFromGallery();
-
-        return view;
     }
 
     private void initializePermissionLauncher() {
@@ -76,9 +95,17 @@ public class FotosFragment extends Fragment {
                 allGranted &= granted;
             }
             if (allGranted) {
-                dispatchTakePictureIntent();
+                try {
+                    File photoFile = createImageFile();
+                    Uri photoURI = FileProvider.getUriForFile(getContext(), "com.stackmobile.fit_journey.fileprovider", photoFile);
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    takePictureLauncher.launch(takePictureIntent);
+                } catch (IOException ex) {
+                    Toast.makeText(getContext(), "Erro ao criar arquivo de imagem!", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(getContext(), "Permissions not granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Permissões negadas!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -86,25 +113,11 @@ public class FotosFragment extends Fragment {
     private void initializeTakePictureLauncher() {
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
-                galleryAddPic();
-                loadImagesFromGallery();
+                saveImagePathToDatabase(currentPhotoPath);
+            } else {
+                Toast.makeText(getContext(), "Foto não tirada!", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File photoFile = null;
-        try {
-            photoFile = createImageFile();
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(getContext(), "com.stackmobile.fitjourney.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                takePictureLauncher.launch(takePictureIntent);
-            }
-        } catch (IOException ex) {
-            Log.e(TAG, "Error occurred while creating the file", ex);
-        }
     }
 
     private File createImageFile() throws IOException {
@@ -112,37 +125,35 @@ public class FotosFragment extends Fragment {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
         );
+
         currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(new File(currentPhotoPath));
-        mediaScanIntent.setData(contentUri);
-        getContext().sendBroadcast(mediaScanIntent);
+    private void saveImagePathToDatabase(String imagePath) {
+        if (usuario != null) {
+            Image newImage = new Image();
+            newImage.setUserId(usuario.getId());
+            newImage.setImagePath(imagePath);
+
+            localDatabase.imageModel().insert(newImage);
+
+            Toast.makeText(getContext(), "Imagem salva com sucesso!", Toast.LENGTH_SHORT).show();
+
+            imageAdapter.addImagePath(imagePath);
+            imageAdapter.notifyDataSetChanged();
+        } else {
+            Toast.makeText(getContext(), "Usuário não encontrado!", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void loadImagesFromGallery() {
-        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File[] imageFiles = storageDir.listFiles();
-        imagePathList.clear();
-
-        if (imageFiles != null && imageFiles.length > 0) {
-            textViewNoPhotos.setVisibility(View.GONE);
-            gridViewGallery.setVisibility(View.VISIBLE);
-            for (File imageFile : imageFiles) {
-                imagePathList.add(imageFile.getAbsolutePath());
-            }
-        } else {
-            textViewNoPhotos.setVisibility(View.VISIBLE);
-            gridViewGallery.setVisibility(View.GONE);
-        }
-
-        imageAdapter.notifyDataSetChanged();
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

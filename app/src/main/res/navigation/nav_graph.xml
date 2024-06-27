@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_to_Register_User"
             app:destination="@id/RegisterUserFragment" />
+        <action
+            android:id="@+id/action_to_home"
+            app:destination="@id/HomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/RegisterUserFragment"
@@ -24,5 +27,51 @@
         <action
             android:id="@+id/action_to_LoginFragment"
             app:destination="@id/LoginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.stackmobile.fit_journey.HomeFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_to_registro"
+            app:destination="@id/RegistroFragment" />
+        <action
+            android:id="@+id/action_to_fotos"
+            app:destination="@id/FotosFragment" />
+        <action
+            android:id="@+id/action_to_lembretes"
+            app:destination="@id/LembreteFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegistroFragment"
+        android:name="com.stackmobile.fit_journey.RegistroFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_registro">
+
+        <action
+            android:id="@+id/action_to_home"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/LembreteFragment"
+        android:name="com.stackmobile.fit_journey.LembretesFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_lembretes">
+
+        <action
+            android:id="@+id/action_to_home"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/FotosFragment"
+        android:name="com.stackmobile.fit_journey.FotosFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_fotos">
+
+        <action
+            android:id="@+id/action_to_home"
+            app:destination="@id/HomeFragment" />
     </fragment>
 </navigation>

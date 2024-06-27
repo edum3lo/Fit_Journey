@@ -1,4 +1,4 @@
-package com.stackmobile.fitjourney.database;
+package com.stackmobile.fit_journey.database;
 
 import android.content.Context;
 
@@ -7,17 +7,19 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import com.stackmobile.fitjourney.database.DAO.ActivityLogDAO;
-import com.stackmobile.fitjourney.database.DAO.NotificationDAO;
-import com.stackmobile.fitjourney.database.DAO.ReminderDAO;
-import com.stackmobile.fitjourney.database.DAO.UserDAO;
-import com.stackmobile.fitjourney.database.entities.ActivityLog;
-import com.stackmobile.fitjourney.database.entities.Notification;
-import com.stackmobile.fitjourney.database.entities.Reminder;
-import com.stackmobile.fitjourney.database.entities.User;
-import com.stackmobile.fitjourney.database.converters.DateConverter;
+import com.stackmobile.fit_journey.database.DAO.ActivityLogDAO;
+import com.stackmobile.fit_journey.database.DAO.ImageDAO;
+import com.stackmobile.fit_journey.database.DAO.NotificationDAO;
+import com.stackmobile.fit_journey.database.DAO.ReminderDAO;
+import com.stackmobile.fit_journey.database.DAO.UserDAO;
+import com.stackmobile.fit_journey.database.entities.ActivityLog;
+import com.stackmobile.fit_journey.database.entities.Image;
+import com.stackmobile.fit_journey.database.entities.Notification;
+import com.stackmobile.fit_journey.database.entities.Reminder;
+import com.stackmobile.fit_journey.database.entities.User;
+import com.stackmobile.fit_journey.database.converters.DateConverter;
 
-@Database(entities = {User.class, Reminder.class, Notification.class, ActivityLog.class}, version = 1)
+@Database(entities = {User.class, Reminder.class, Notification.class, ActivityLog.class, Image.class}, version = 2)
 @TypeConverters({DateConverter.class})
 public abstract class LocalDatabase extends RoomDatabase {
     private static LocalDatabase INSTANCE;
@@ -38,4 +40,5 @@ public abstract class LocalDatabase extends RoomDatabase {
     public abstract NotificationDAO notificationModel();
     public abstract ReminderDAO reminderModel();
     public abstract ActivityLogDAO activityLogModel();
+    public abstract ImageDAO imageModel();
 }

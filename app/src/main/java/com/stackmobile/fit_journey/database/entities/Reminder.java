@@ -1,4 +1,4 @@
-package com.stackmobile.fitjourney.database.entities;
+package com.stackmobile.fit_journey.database.entities;
 
 import android.os.Parcel;
 import android.os.Parcelable;

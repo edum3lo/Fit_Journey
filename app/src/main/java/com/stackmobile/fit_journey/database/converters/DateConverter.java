@@ -1,4 +1,4 @@
-package com.stackmobile.fitjourney.database.converters;
+package com.stackmobile.fit_journey.database.converters;
 
 import androidx.room.TypeConverter;
 import java.util.Date;
