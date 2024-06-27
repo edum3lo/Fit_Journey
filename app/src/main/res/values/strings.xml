@@ -1,0 +1,39 @@
+<resources>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="app_name">FITJourney</string>
+    <string name="logo">Logo do FITJourney</string>
+    <string name="registro">Registro</string>
+    <string name="lembrete">Lembrete</string>
+    <string name="fotos">Fotos</string>
+    <string name="locais">Locais</string>
+
+    <string-array name="activity_levels">
+        <item>30 minutos</item>
+        <item>entre 30 min a 1 hora</item>
+        <item>entre 1h a 1h30</item>
+        <item>mais de 2 horas</item>
+    </string-array>
+
+    <string-array name="water_levels">
+        <item>1L</item>
+        <item>1 a 2L</item>
+        <item>2 a 3L</item>
+        <item>3L ou mais</item>
+    </string-array>
+
+    <string-array name="sleep_levels">
+        <item>4 a 6 horas</item>
+        <item>6 a 8 horas</item>
+        <item>8 horas</item>
+        <item>8 a 10 horas</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
