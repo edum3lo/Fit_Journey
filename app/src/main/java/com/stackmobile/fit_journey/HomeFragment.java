@@ -38,19 +38,19 @@ public class HomeFragment extends Fragment {
 
         binding.textRegistro.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_to_registro)
+                    .navigate(R.id.action_to_registro, bundle)
         );
         binding.imageRegistro.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_to_registro)
+                        .navigate(R.id.action_to_registro, bundle)
         );
         binding.textLembrete.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_to_lembretes)
+                        .navigate(R.id.action_to_lembretes, bundle)
         );
         binding.imageLembrete.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_to_lembretes)
+                        .navigate(R.id.action_to_lembretes, bundle)
         );
         binding.textFotos.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
